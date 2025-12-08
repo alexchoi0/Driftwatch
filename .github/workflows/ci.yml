@@ -78,6 +78,8 @@ jobs:
         run: pnpm build
         env:
           AUTH_SECRET: ci-test-secret-that-is-at-least-32-characters-long
+          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-anon-key"
 
   e2e:
     name: E2E Tests
@@ -103,14 +105,32 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase start
+
+      - name: Push Prisma schema to local Supabase
+        run: pnpm exec prisma db push --force-reset
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+          DIRECT_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
 
       - name: Run e2e tests
-        run: pnpm test:e2e
+        run: pnpm exec playwright test
         env:
           DEV_MODE: "true"
-          AUTH_SECRET: ci-test-secret-that-is-at-least-32-characters-long
+          AUTH_SECRET: e2e-test-secret-that-is-at-least-32-characters-long
+          DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+          DIRECT_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+          NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
