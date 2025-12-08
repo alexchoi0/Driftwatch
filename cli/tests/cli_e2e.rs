@@ -3,7 +3,6 @@
 //! These tests run the actual CLI binary with mock Criterion output
 //! and verify correct parsing and behavior.
 
-use std::io::Write;
 use std::process::Command;
 
 /// Sample Criterion benchmark output for testing
