@@ -84,11 +84,29 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: server
     steps:
       - uses: actions/checkout@v4
+
+      # Build CLI binary (needed for full E2E flow tests)
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-e2e-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-e2e-
+            ${{ runner.os }}-cargo-
+
+      - name: Build CLI
+        run: cargo build --release -p rabbitbench
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -104,6 +122,7 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: server
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
@@ -112,18 +131,22 @@ jobs:
 
       - name: Start local Supabase
         run: supabase start
+        working-directory: server
 
       - name: Push Prisma schema to local Supabase
         run: pnpm exec prisma db push --force-reset
+        working-directory: server
         env:
           DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
           DIRECT_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install chromium --with-deps
+        working-directory: server
 
-      - name: Run e2e tests
+      - name: Run E2E tests
         run: pnpm exec playwright test
+        working-directory: server
         env:
           DEV_MODE: "true"
           AUTH_SECRET: e2e-test-secret-that-is-at-least-32-characters-long

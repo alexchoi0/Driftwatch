@@ -189,6 +189,7 @@ impl ApiClient {
         branch: &str,
         testbed: &str,
         git_hash: Option<&str>,
+        pr_number: Option<i32>,
         metrics: Vec<MetricInput>,
     ) -> Result<Report> {
         let query = r#"
@@ -220,6 +221,7 @@ impl ApiClient {
                         "branch": branch,
                         "testbed": testbed,
                         "gitHash": git_hash,
+                        "prNumber": pr_number,
                         "metrics": metrics
                     }
                 }),
