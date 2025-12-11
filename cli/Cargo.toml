@@ -1,10 +1,10 @@
 [package]
-name = "rabbitbench"
+name = "driftwatch"
 version.workspace = true
 edition.workspace = true
 
 [[bin]]
-name = "rabbitbench"
+name = "driftwatch"
 path = "src/main.rs"
 
 [dependencies]

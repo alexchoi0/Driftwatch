@@ -4,7 +4,7 @@ import { Suspense } from "react";
 async function getGitHubStars(): Promise<number | null> {
   try {
     const res = await fetch(
-      "https://api.github.com/repos/alexchoi0/rabbitbench",
+      "https://api.github.com/repos/alexchoi0/driftwatch",
       { next: { revalidate: 3600 } } // Cache for 1 hour
     );
     if (!res.ok) return null;
@@ -30,7 +30,7 @@ function GitHubIcon() {
 function GitHubLinkWrapper({ children }: { children: React.ReactNode }) {
   return (
     <a
-      href="https://github.com/alexchoi0/rabbitbench"
+      href="https://github.com/alexchoi0/driftwatch"
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground min-w-[60px]"

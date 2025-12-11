@@ -1,9 +1,9 @@
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-const DEFAULT_API_URL: &str = "https://rabbitbench.dev";
+const DEFAULT_API_URL: &str = "https://driftwatch.dev";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -19,19 +19,19 @@ fn default_api_url() -> String {
 impl Config {
     pub fn load() -> Result<Self> {
         let api_url =
-            std::env::var("RABBITBENCH_API_URL").unwrap_or_else(|_| DEFAULT_API_URL.to_string());
+            std::env::var("DRIFTWATCH_API_URL").unwrap_or_else(|_| DEFAULT_API_URL.to_string());
 
-        if let Ok(token) = std::env::var("RABBITBENCH_TOKEN") {
+        if let Ok(token) = std::env::var("DRIFTWATCH_TOKEN") {
             return Ok(Config { token, api_url });
         }
 
         let config_path = get_config_path()?;
         let config_str = fs::read_to_string(&config_path)
-            .context("Not authenticated. Run 'rabbitbench auth login' first.")?;
+            .context("Not authenticated. Run 'driftwatch auth login' first.")?;
         let mut config: Config = toml::from_str(&config_str).context("Invalid config file")?;
 
         // Environment variable overrides config file
-        if std::env::var("RABBITBENCH_API_URL").is_ok() {
+        if std::env::var("DRIFTWATCH_API_URL").is_ok() {
             config.api_url = api_url;
         }
 
@@ -42,7 +42,7 @@ impl Config {
 fn get_config_path() -> Result<PathBuf> {
     let config_dir = dirs::config_dir()
         .context("Could not determine config directory")?
-        .join("rabbitbench");
+        .join("driftwatch");
     Ok(config_dir.join("config.toml"))
 }
 
@@ -229,6 +229,116 @@ impl ApiClient {
             .await?;
         Ok(response.create_report)
     }
+
+    pub async fn get_flamegraph_upload_url(
+        &self,
+        project_slug: &str,
+        file_name: &str,
+    ) -> Result<FlamegraphUploadUrl> {
+        let query = r#"
+            mutation CreateFlamegraphUploadUrl($projectSlug: String!, $fileName: String!) {
+                createFlamegraphUploadUrl(projectSlug: $projectSlug, fileName: $fileName) {
+                    signedUrl
+                    token
+                    storagePath
+                }
+            }
+        "#;
+
+        #[derive(Deserialize)]
+        struct Response {
+            #[serde(rename = "createFlamegraphUploadUrl")]
+            create_flamegraph_upload_url: FlamegraphUploadUrl,
+        }
+
+        let response: Response = self
+            .graphql(
+                query,
+                serde_json::json!({
+                    "projectSlug": project_slug,
+                    "fileName": file_name
+                }),
+            )
+            .await?;
+        Ok(response.create_flamegraph_upload_url)
+    }
+
+    pub async fn upload_flamegraph_file(&self, signed_url: &str, file_path: &Path) -> Result<()> {
+        let file_content = fs::read(file_path).context("Failed to read flamegraph file")?;
+
+        let response = self
+            .client
+            .put(signed_url)
+            .header("Content-Type", "image/svg+xml")
+            .body(file_content)
+            .send()
+            .await
+            .context("Failed to upload flamegraph")?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(anyhow::anyhow!(
+                "Failed to upload flamegraph: {} - {}",
+                status,
+                body
+            ));
+        }
+
+        Ok(())
+    }
+
+    pub async fn confirm_flamegraph_upload(
+        &self,
+        report_id: &str,
+        storage_path: &str,
+        file_name: &str,
+        file_size: i64,
+        benchmark_name: Option<&str>,
+    ) -> Result<Flamegraph> {
+        let query = r#"
+            mutation ConfirmFlamegraphUpload(
+                $reportId: ID!,
+                $storagePath: String!,
+                $fileName: String!,
+                $fileSize: Int!,
+                $benchmarkName: String
+            ) {
+                confirmFlamegraphUpload(
+                    reportId: $reportId,
+                    storagePath: $storagePath,
+                    fileName: $fileName,
+                    fileSize: $fileSize,
+                    benchmarkName: $benchmarkName
+                ) {
+                    id
+                    storagePath
+                    fileName
+                    fileSize
+                }
+            }
+        "#;
+
+        #[derive(Deserialize)]
+        struct Response {
+            #[serde(rename = "confirmFlamegraphUpload")]
+            confirm_flamegraph_upload: Flamegraph,
+        }
+
+        let response: Response = self
+            .graphql(
+                query,
+                serde_json::json!({
+                    "reportId": report_id,
+                    "storagePath": storage_path,
+                    "fileName": file_name,
+                    "fileSize": file_size,
+                    "benchmarkName": benchmark_name
+                }),
+            )
+            .await?;
+        Ok(response.confirm_flamegraph_upload)
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -323,4 +433,26 @@ pub struct Alert {
     pub baseline_value: f64,
     #[serde(rename = "percentChange")]
     pub percent_change: f64,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
+pub struct FlamegraphUploadUrl {
+    #[serde(rename = "signedUrl")]
+    pub signed_url: String,
+    pub token: String,
+    #[serde(rename = "storagePath")]
+    pub storage_path: String,
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
+pub struct Flamegraph {
+    pub id: String,
+    #[serde(rename = "storagePath")]
+    pub storage_path: String,
+    #[serde(rename = "fileName")]
+    pub file_name: String,
+    #[serde(rename = "fileSize")]
+    pub file_size: i64,
 }

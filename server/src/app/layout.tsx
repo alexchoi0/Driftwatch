@@ -20,7 +20,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RabbitBench",
+  title: "Driftwatch",
   description: "Continuous benchmarking for Rust projects",
 };
 

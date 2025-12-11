@@ -9,7 +9,7 @@ mod commands;
 use commands::{auth, project, run};
 
 #[derive(Parser)]
-#[command(name = "rabbitbench")]
+#[command(name = "driftwatch")]
 #[command(about = "CLI tool for benchmark submission and management")]
 #[command(version)]
 struct Cli {
@@ -18,7 +18,7 @@ struct Cli {
 
     #[arg(
         long,
-        env = "RABBITBENCH_API_URL",
+        env = "DRIFTWATCH_API_URL",
         default_value = "http://localhost:8080"
     )]
     api_url: String,
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "rabbitbench=info".into()),
+                .unwrap_or_else(|_| "driftwatch=info".into()),
         )
         .with(tracing_subscriber::fmt::layer().without_time())
         .init();

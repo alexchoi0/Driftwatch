@@ -127,7 +127,7 @@ export async function updateCommitStatus(
         body: JSON.stringify({
           state,
           description,
-          context: "rabbitbench/performance",
+          context: "driftwatch/performance",
         }),
       }
     );

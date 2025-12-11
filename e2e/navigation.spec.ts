@@ -4,7 +4,7 @@ test.describe("Navigation", () => {
   test("header shows logo linking to home", async ({ page }) => {
     await page.goto("/");
 
-    const logo = page.getByRole("link", { name: "RabbitBench" });
+    const logo = page.getByRole("link", { name: "Driftwatch" });
 
     await expect(logo).toBeVisible();
     await expect(logo).toHaveAttribute("href", "/");

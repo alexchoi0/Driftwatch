@@ -15,7 +15,7 @@ export default async function Home() {
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:h-16 sm:px-6">
           <Link href="/" className="text-lg font-semibold tracking-tight sm:text-xl">
-            RabbitBench
+            Driftwatch
           </Link>
           {/* Desktop nav */}
           <nav className="hidden items-center gap-6 sm:flex">
@@ -55,7 +55,7 @@ export default async function Home() {
                 <GetStartedButton isSignedIn={!!session} />
                 <Button asChild variant="outline" size="lg" className="h-11 px-6 sm:h-12 sm:px-8">
                   <a
-                    href="https://github.com/alexchoi0/rabbitbench"
+                    href="https://github.com/alexchoi0/driftwatch"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -238,18 +238,18 @@ export default async function Home() {
                       <span className="text-[#a1a1a1]"># Install the CLI</span>
                       {"\n"}
                       <span style={{ color: BRAND_COLOR }}>$</span> cargo install
-                      rabbitbench
+                      driftwatch
                       {"\n\n"}
                       <span className="text-[#a1a1a1]"># Authenticate</span>
                       {"\n"}
-                      <span style={{ color: BRAND_COLOR }}>$</span> rabbitbench auth
+                      <span style={{ color: BRAND_COLOR }}>$</span> driftwatch auth
                       login
                       {"\n\n"}
                       <span className="text-[#a1a1a1]">
                         # Run benchmarks and submit
                       </span>
                       {"\n"}
-                      <span style={{ color: BRAND_COLOR }}>$</span> rabbitbench run \
+                      <span style={{ color: BRAND_COLOR }}>$</span> driftwatch run \
                       {"\n"}
                       {"    "}--project my-lib \{"\n"}
                       {"    "}--branch main \{"\n"}

@@ -1,6 +1,6 @@
-# RabbitBench Server
+# Driftwatch Server
 
-Next.js application providing the web dashboard and GraphQL API for RabbitBench.
+Next.js application providing the web dashboard and GraphQL API for Driftwatch.
 
 ## Tech Stack
 
@@ -37,7 +37,7 @@ AUTH_SECRET="your-random-secret-key"
 
 # Optional: Dev mode (bypasses auth)
 DEV_MODE=false
-DEV_API_TOKEN="rb_..."
+DEV_API_TOKEN="dw_..."
 ```
 
 ### Installation
@@ -206,7 +206,7 @@ Uses Supabase Auth with GitHub OAuth. Session is stored in cookies.
 
 ### API (CLI/CI)
 
-Uses API tokens in the format `rb_<uuid>`. Tokens are hashed (SHA256) before storage.
+Uses API tokens in the format `dw_<uuid>`. Tokens are hashed (SHA256) before storage.
 
 Create tokens in the dashboard settings or via the CLI browser auth flow.
 
@@ -216,7 +216,7 @@ For local development without Supabase:
 
 ```bash
 DEV_MODE=true
-DEV_API_TOKEN=rb_your_test_token  # Optional: use real user
+DEV_API_TOKEN=dw_your_test_token  # Optional: use real user
 ```
 
 When `DEV_MODE=true`:

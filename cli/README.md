@@ -1,6 +1,6 @@
-# RabbitBench CLI
+# Driftwatch CLI
 
-Command-line tool for submitting benchmark results to RabbitBench.
+Command-line tool for submitting benchmark results to Driftwatch.
 
 ## Installation
 
@@ -12,42 +12,42 @@ cargo install --path cli
 
 ### Pre-built binary
 
-Download from [releases](https://github.com/yourusername/rabbitbench/releases) and add to your PATH.
+Download from [releases](https://github.com/yourusername/driftwatch/releases) and add to your PATH.
 
 ## Authentication
 
 ### Browser login (recommended)
 
 ```bash
-rabbitbench auth login
+driftwatch auth login
 ```
 
 This will:
-1. Open your browser to the RabbitBench login page
+1. Open your browser to the Driftwatch login page
 2. After you authenticate, redirect back to the CLI
 3. Save your credentials locally
 
 ```
-$ rabbitbench auth login
+$ driftwatch auth login
 
 Opening browser for authentication...
 
 If the browser doesn't open, visit this URL:
-https://rabbitbench.dev/cli-auth?callback=http%3A%2F%2F127.0.0.1%3A54321%2Fcallback
+https://driftwatch.dev/cli-auth?callback=http%3A%2F%2F127.0.0.1%3A54321%2Fcallback
 
 Waiting for authentication...
 Validating token...
 
 Authenticated as: user@example.com
-Config saved to: ~/Library/Application Support/rabbitbench/config.toml
+Config saved to: ~/Library/Application Support/driftwatch/config.toml
 ```
 
 ### API token login
 
-If you prefer, you can create an API token in your [dashboard settings](https://rabbitbench.dev/settings) and use it directly:
+If you prefer, you can create an API token in your [dashboard settings](https://driftwatch.dev/settings) and use it directly:
 
 ```bash
-rabbitbench auth login --token rb_your_api_token_here
+driftwatch auth login --token dw_your_api_token_here
 ```
 
 ### Environment variables
@@ -55,30 +55,30 @@ rabbitbench auth login --token rb_your_api_token_here
 You can also set credentials via environment variables:
 
 ```bash
-export RABBITBENCH_TOKEN=rb_your_api_token_here
-export RABBITBENCH_API_URL=https://rabbitbench.dev  # optional, for self-hosted
+export DRIFTWATCH_TOKEN=dw_your_api_token_here
+export DRIFTWATCH_API_URL=https://driftwatch.dev  # optional, for self-hosted
 ```
 
 ### Check status
 
 ```bash
-rabbitbench auth status
+driftwatch auth status
 ```
 
 ### Logout
 
 ```bash
-rabbitbench auth logout
+driftwatch auth logout
 ```
 
 ## Usage
 
 ### Submit benchmark results
 
-Pipe your benchmark output to `rabbitbench run`:
+Pipe your benchmark output to `driftwatch run`:
 
 ```bash
-cargo bench -- --save-baseline main | rabbitbench run \
+cargo bench -- --save-baseline main | driftwatch run \
   --project my-project \
   --branch main \
   --testbed local
@@ -91,7 +91,7 @@ Supported benchmark formats:
 ### Options
 
 ```
-rabbitbench run [OPTIONS]
+driftwatch run [OPTIONS]
 
 Options:
   --project <SLUG>     Project slug (required)
@@ -104,37 +104,37 @@ Options:
 ### List projects
 
 ```bash
-rabbitbench project list
+driftwatch project list
 ```
 
 ### Create a project
 
 ```bash
-rabbitbench project create --slug my-project --name "My Project"
+driftwatch project create --slug my-project --name "My Project"
 ```
 
 ## Self-hosted instances
 
-For self-hosted RabbitBench instances, specify the API URL:
+For self-hosted Driftwatch instances, specify the API URL:
 
 ```bash
 # During login
-rabbitbench auth login --api-url https://your-instance.com
+driftwatch auth login --api-url https://your-instance.com
 
 # Or via environment variable
-export RABBITBENCH_API_URL=https://your-instance.com
-rabbitbench auth login
+export DRIFTWATCH_API_URL=https://your-instance.com
+driftwatch auth login
 ```
 
 ## Configuration
 
 Config is stored at:
-- macOS: `~/Library/Application Support/rabbitbench/config.toml`
-- Linux: `~/.config/rabbitbench/config.toml`
-- Windows: `%APPDATA%\rabbitbench\config.toml`
+- macOS: `~/Library/Application Support/driftwatch/config.toml`
+- Linux: `~/.config/driftwatch/config.toml`
+- Windows: `%APPDATA%\driftwatch\config.toml`
 
 Example config:
 ```toml
-token = "rb_your_api_token"
-api_url = "https://rabbitbench.dev"
+token = "dw_your_api_token"
+api_url = "https://driftwatch.dev"
 ```

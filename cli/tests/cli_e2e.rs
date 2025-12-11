@@ -1,4 +1,4 @@
-//! End-to-end tests for the rabbitbench CLI
+//! End-to-end tests for the driftwatch CLI
 //!
 //! These tests run the actual CLI binary with mock Criterion output
 //! and verify correct parsing and behavior.
@@ -33,7 +33,7 @@ fn cli_binary() -> std::path::PathBuf {
     path.pop(); // Go up from cli/ to workspace root
     path.push("target");
     path.push("release");
-    path.push("rabbitbench");
+    path.push("driftwatch");
     path
 }
 
@@ -57,7 +57,7 @@ fn create_mock_benchmark_script(output: &str) -> std::path::PathBuf {
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
         .as_nanos();
-    let script_path = temp_dir.join(format!("rabbitbench_test_{}.sh", unique_id));
+    let script_path = temp_dir.join(format!("driftwatch_test_{}.sh", unique_id));
 
     // Write the script content
     let mut content = String::new();
@@ -99,7 +99,7 @@ fn test_run_dry_run_parses_criterion_output() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .output()
         .expect("Failed to execute CLI");
 
@@ -149,7 +149,7 @@ fn test_run_dry_run_with_pr_flag() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .output()
         .expect("Failed to execute CLI");
 
@@ -182,7 +182,7 @@ fn test_run_dry_run_with_github_ref_env() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .env("GITHUB_REF", "refs/pull/123/merge")
         .output()
         .expect("Failed to execute CLI");
@@ -218,7 +218,7 @@ fn test_run_dry_run_explicit_pr_overrides_env() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .env("GITHUB_REF", "refs/pull/999/merge")
         .output()
         .expect("Failed to execute CLI");
@@ -255,7 +255,7 @@ fn test_run_no_benchmarks_found() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .output()
         .expect("Failed to execute CLI");
 
@@ -293,7 +293,7 @@ bench_s                 time:   [1.0000 s 1.1000 s 1.2000 s]
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .output()
         .expect("Failed to execute CLI");
 
@@ -329,7 +329,7 @@ fn test_run_displays_testbed_defaulting_to_os() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .output()
         .expect("Failed to execute CLI");
 
@@ -363,7 +363,7 @@ fn test_run_custom_testbed() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .output()
         .expect("Failed to execute CLI");
 
@@ -396,7 +396,7 @@ fn test_run_with_git_hash() {
             "--dry-run",
             script.to_str().unwrap(),
         ])
-        .env("RABBITBENCH_TOKEN", "fake-token-for-testing")
+        .env("DRIFTWATCH_TOKEN", "fake-token-for-testing")
         .output()
         .expect("Failed to execute CLI");
 

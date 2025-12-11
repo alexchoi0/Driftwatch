@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use clap::Args;
+use std::path::PathBuf;
 use std::process::Command;
 
 use crate::adapters::criterion::parse_criterion_output;
@@ -22,6 +23,10 @@ pub struct RunArgs {
     /// GitHub PR number for posting comments (auto-detected from GITHUB_REF)
     #[arg(long)]
     pub pr: Option<i32>,
+
+    /// Path to flamegraph SVG file(s) to upload with the report
+    #[arg(long, value_name = "FILE")]
+    pub flamegraph: Vec<PathBuf>,
 
     #[arg(long)]
     pub dry_run: bool,
@@ -87,6 +92,9 @@ pub async fn handle(args: RunArgs, api_url: &str) -> Result<()> {
     }
     if let Some(pr) = pr_number {
         println!("  PR: #{}", pr);
+    }
+    if !args.flamegraph.is_empty() {
+        println!("  Flamegraphs: {} file(s)", args.flamegraph.len());
     }
     println!();
 
@@ -177,6 +185,68 @@ pub async fn handle(args: RunArgs, api_url: &str) -> Result<()> {
                 "  - {}{:.1}% change (baseline: {:.2})",
                 direction, alert.percent_change, alert.baseline_value
             );
+        }
+    }
+
+    // Upload flamegraphs if provided
+    if !args.flamegraph.is_empty() {
+        println!("\nUploading {} flamegraph(s)...", args.flamegraph.len());
+
+        for flamegraph_path in &args.flamegraph {
+            // Validate file exists and is SVG
+            if !flamegraph_path.exists() {
+                eprintln!(
+                    "Warning: Flamegraph file not found: {}",
+                    flamegraph_path.display()
+                );
+                continue;
+            }
+
+            let file_name = flamegraph_path
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("flamegraph.svg");
+
+            let metadata = std::fs::metadata(flamegraph_path)
+                .context("Failed to read flamegraph file metadata")?;
+            let file_size = metadata.len() as i64;
+
+            // Check file size (10 MiB limit)
+            const MAX_FILE_SIZE: i64 = 10 * 1024 * 1024;
+            if file_size > MAX_FILE_SIZE {
+                eprintln!(
+                    "Warning: Flamegraph file too large ({}MB > 10MB limit): {}",
+                    file_size / 1024 / 1024,
+                    flamegraph_path.display()
+                );
+                continue;
+            }
+
+            // Get signed upload URL
+            let upload_url = client
+                .get_flamegraph_upload_url(&args.project, file_name)
+                .await
+                .context("Failed to get flamegraph upload URL")?;
+
+            // Upload file to storage
+            client
+                .upload_flamegraph_file(&upload_url.signed_url, flamegraph_path)
+                .await
+                .context("Failed to upload flamegraph file")?;
+
+            // Confirm upload and link to report
+            let flamegraph = client
+                .confirm_flamegraph_upload(
+                    &report.id,
+                    &upload_url.storage_path,
+                    file_name,
+                    file_size,
+                    None, // No specific benchmark association
+                )
+                .await
+                .context("Failed to confirm flamegraph upload")?;
+
+            println!("  Uploaded: {} ({})", file_name, flamegraph.id);
         }
     }
 

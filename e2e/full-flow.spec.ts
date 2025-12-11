@@ -40,7 +40,7 @@ test.describe("Full User Flow E2E", () => {
     // ============================================
     await test.step("Visit home page", async () => {
       await page.goto("/");
-      await expect(page).toHaveTitle(/RabbitBench/i);
+      await expect(page).toHaveTitle(/Driftwatch/i);
       await expect(
         page.getByRole("heading", { name: /Benchmark Performance/i })
       ).toBeVisible();
@@ -109,10 +109,10 @@ test.describe("Full User Flow E2E", () => {
       const tokenText = await codeElement.textContent();
 
       // Token format: rb_{32 hex chars}
-      const tokenMatch = tokenText?.match(/rb_[a-f0-9]{32}/);
+      const tokenMatch = tokenText?.match(/dw_[a-f0-9]{32}/);
       apiToken = tokenMatch ? tokenMatch[0] : "";
 
-      expect(apiToken).toMatch(/^rb_[a-f0-9]{32}$/);
+      expect(apiToken).toMatch(/^dw_[a-f0-9]{32}$/);
 
       // Click Done to dismiss the token display
       await page.getByRole("button", { name: /Done/i }).click();
@@ -123,7 +123,7 @@ test.describe("Full User Flow E2E", () => {
     // ============================================
     await test.step("Run CLI with benchmark data", async () => {
       // Create temporary script that outputs Criterion-like results
-      const tempDir = join(tmpdir(), `rabbitbench-e2e-${Date.now()}`);
+      const tempDir = join(tmpdir(), `driftwatch-e2e-${Date.now()}`);
       mkdirSync(tempDir, { recursive: true });
 
       const scriptPath = join(tempDir, "mock-benchmark.sh");
@@ -138,7 +138,7 @@ CRITERION_EOF
       );
 
       // Path to CLI binary - go up from server to workspace root
-      const cliBinary = join(process.cwd(), "..", "target", "release", "rabbitbench");
+      const cliBinary = join(process.cwd(), "..", "target", "release", "driftwatch");
 
       // Get the API URL - CLI appends /graphql, so we need /api as base
       const apiUrl = "http://localhost:3000/api";
@@ -150,8 +150,8 @@ CRITERION_EOF
           {
             env: {
               ...process.env,
-              RABBITBENCH_TOKEN: apiToken,
-              RABBITBENCH_API_URL: apiUrl,
+              DRIFTWATCH_TOKEN: apiToken,
+              DRIFTWATCH_API_URL: apiUrl,
             },
             encoding: "utf-8",
             timeout: 30000,
@@ -259,7 +259,7 @@ CRITERION_EOF
       const result = await response.json();
       expect(result.errors).toBeUndefined();
       apiToken = result.data?.createApiToken.secret;
-      expect(apiToken).toMatch(/^rb_[a-f0-9]{32}$/);
+      expect(apiToken).toMatch(/^dw_[a-f0-9]{32}$/);
     });
 
     // ============================================
@@ -281,11 +281,11 @@ CRITERION_EOF
         },
       ];
 
-      const cliBinary = join(process.cwd(), "..", "target", "release", "rabbitbench");
+      const cliBinary = join(process.cwd(), "..", "target", "release", "driftwatch");
       const apiUrl = "http://localhost:3000/api";
 
       for (const { hash, output } of benchmarkOutputs) {
-        const tempDir = join(tmpdir(), `rabbitbench-multi-${Date.now()}-${hash}`);
+        const tempDir = join(tmpdir(), `driftwatch-multi-${Date.now()}-${hash}`);
         mkdirSync(tempDir, { recursive: true });
 
         const scriptPath = join(tempDir, "mock.sh");
@@ -301,8 +301,8 @@ CRITERION_EOF
             {
               env: {
                 ...process.env,
-                RABBITBENCH_TOKEN: apiToken,
-                RABBITBENCH_API_URL: apiUrl,
+                DRIFTWATCH_TOKEN: apiToken,
+                DRIFTWATCH_API_URL: apiUrl,
               },
               encoding: "utf-8",
               timeout: 30000,
@@ -412,12 +412,12 @@ CRITERION_EOF
 
       const result = await response.json();
       apiToken = result.data?.createApiToken.secret;
-      expect(apiToken).toMatch(/^rb_[a-f0-9]{32}$/);
+      expect(apiToken).toMatch(/^dw_[a-f0-9]{32}$/);
     });
 
     // Run CLI with PR number
     await test.step("Run CLI with PR number", async () => {
-      const tempDir = join(tmpdir(), `rabbitbench-e2e-pr-${Date.now()}`);
+      const tempDir = join(tmpdir(), `driftwatch-e2e-pr-${Date.now()}`);
       mkdirSync(tempDir, { recursive: true });
 
       const scriptPath = join(tempDir, "mock-benchmark.sh");
@@ -431,7 +431,7 @@ CRITERION_EOF
         { mode: 0o755 }
       );
 
-      const cliBinary = join(process.cwd(), "..", "target", "release", "rabbitbench");
+      const cliBinary = join(process.cwd(), "..", "target", "release", "driftwatch");
       const apiUrl = "http://localhost:3000/api";
 
       try {
@@ -440,8 +440,8 @@ CRITERION_EOF
           {
             env: {
               ...process.env,
-              RABBITBENCH_TOKEN: apiToken,
-              RABBITBENCH_API_URL: apiUrl,
+              DRIFTWATCH_TOKEN: apiToken,
+              DRIFTWATCH_API_URL: apiUrl,
             },
             encoding: "utf-8",
             timeout: 30000,

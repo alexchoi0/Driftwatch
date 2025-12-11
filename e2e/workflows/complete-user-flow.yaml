@@ -14,7 +14,7 @@ description: Test the full user flow from landing to benchmark results
 timeout: 120000
 
 env:
-  CLI_BINARY: ../target/release/rabbitbench
+  CLI_BINARY: ../target/release/driftwatch
   API_URL: http://localhost:3000/api
 
 jobs:
@@ -176,7 +176,7 @@ jobs:
         with:
           key: apiToken
           selector: code
-          regex: rb_[a-f0-9]{32}
+          regex: dw_[a-f0-9]{32}
 
       - name: Click Done button
         uses: click
@@ -211,8 +211,8 @@ jobs:
             chmod +x "$SCRIPT"
             "${{ env.CLI_BINARY }}" run -p "${{ vars.slug }}" -b main --hash e2e123abc "$SCRIPT"
           env:
-            RABBITBENCH_TOKEN: ${{ vars.apiToken }}
-            RABBITBENCH_API_URL: ${{ env.API_URL }}
+            DRIFTWATCH_TOKEN: ${{ vars.apiToken }}
+            DRIFTWATCH_API_URL: ${{ env.API_URL }}
           timeout: 30000
           storeOutput: cliOutput
 

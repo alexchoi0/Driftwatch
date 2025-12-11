@@ -47,7 +47,7 @@ test.describe("Home Page", () => {
 
     const githubLink = page.getByRole("link", { name: /View on GitHub/i });
 
-    await expect(githubLink).toHaveAttribute("href", "https://github.com/alexchoi0/rabbitbench");
+    await expect(githubLink).toHaveAttribute("href", "https://github.com/alexchoi0/driftwatch");
     await expect(githubLink).toHaveAttribute("target", "_blank");
   });
 

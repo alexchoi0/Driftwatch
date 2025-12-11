@@ -35,13 +35,13 @@ export async function BenchmarkChart({
         <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto flex-1">
           <code>
 {`# Install the CLI
-cargo install rabbitbench
+cargo install driftwatch
 
 # Configure with your API token
-rabbitbench auth login
+driftwatch auth login
 
 # Run benchmarks and submit
-cargo bench -- --save-baseline main | rabbitbench run \\
+cargo bench -- --save-baseline main | driftwatch run \\
   --project ${projectSlug} \\
   --branch main \\
   --testbed local`}

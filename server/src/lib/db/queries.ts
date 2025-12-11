@@ -55,6 +55,14 @@ export const getProjectBySlug = cache(async (userId: string, slug: string) => {
         include: {
           branch: true,
           testbed: true,
+          flamegraphs: {
+            select: {
+              id: true,
+              fileName: true,
+              fileSize: true,
+              storagePath: true,
+            },
+          },
         },
       },
     },

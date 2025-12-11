@@ -109,7 +109,7 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Build CLI
-        run: cargo build --release -p rabbitbench
+        run: cargo build --release -p driftwatch
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4

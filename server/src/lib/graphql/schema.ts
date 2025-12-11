@@ -3,6 +3,11 @@ import type { GraphQLContext } from "./context";
 import { generateApiToken, hashApiToken } from "@/lib/auth";
 import { checkThreshold } from "@/lib/services/threshold";
 import { postPRComment, updateCommitStatus } from "@/lib/services/github";
+import {
+  generateStoragePath,
+  createSignedUploadUrl,
+  createSignedReadUrl,
+} from "@/lib/supabase/storage";
 
 const typeDefs = /* GraphQL */ `
   scalar DateTime
@@ -83,6 +88,23 @@ const typeDefs = /* GraphQL */ `
     testbed: Testbed!
     metrics: [Metric!]!
     alerts: [Alert!]!
+    flamegraphs: [Flamegraph!]!
+  }
+
+  type Flamegraph {
+    id: ID!
+    storagePath: String!
+    fileName: String!
+    fileSize: Int!
+    url: String!
+    createdAt: DateTime!
+    benchmark: Benchmark
+  }
+
+  type FlamegraphUploadUrl {
+    signedUrl: String!
+    token: String!
+    storagePath: String!
   }
 
   type Metric {
@@ -227,6 +249,14 @@ const typeDefs = /* GraphQL */ `
     createApiToken(name: String!): ApiTokenResult!
     revokeApiToken(id: ID!): Boolean!
     updateGitHubSettings(slug: String!, input: UpdateGitHubSettingsInput!): Project!
+    createFlamegraphUploadUrl(projectSlug: String!, fileName: String!): FlamegraphUploadUrl!
+    confirmFlamegraphUpload(
+      reportId: ID!
+      storagePath: String!
+      fileName: String!
+      fileSize: Int!
+      benchmarkName: String
+    ): Flamegraph!
   }
 `;
 
@@ -844,6 +874,75 @@ const resolvers = {
         },
       });
     },
+
+    createFlamegraphUploadUrl: async (
+      _: unknown,
+      { projectSlug, fileName }: { projectSlug: string; fileName: string },
+      ctx: GraphQLContext
+    ) => {
+      if (!ctx.user) throw new Error("Not authenticated");
+
+      const project = await ctx.prisma.project.findFirst({
+        where: { userId: ctx.user.id, slug: projectSlug },
+      });
+      if (!project) throw new Error("Project not found");
+
+      const storagePath = generateStoragePath(project.id, fileName);
+      const { signedUrl, token } = await createSignedUploadUrl(storagePath);
+
+      return { signedUrl, token, storagePath };
+    },
+
+    confirmFlamegraphUpload: async (
+      _: unknown,
+      {
+        reportId,
+        storagePath,
+        fileName,
+        fileSize,
+        benchmarkName,
+      }: {
+        reportId: string;
+        storagePath: string;
+        fileName: string;
+        fileSize: number;
+        benchmarkName?: string;
+      },
+      ctx: GraphQLContext
+    ) => {
+      if (!ctx.user) throw new Error("Not authenticated");
+
+      // Verify report exists and user owns it
+      const report = await ctx.prisma.report.findUnique({
+        where: { id: reportId },
+        include: { project: true },
+      });
+      if (!report || report.project.userId !== ctx.user.id) {
+        throw new Error("Report not found");
+      }
+
+      // Find benchmark if name provided
+      let benchmarkId: string | null = null;
+      if (benchmarkName) {
+        const benchmark = await ctx.prisma.benchmark.findFirst({
+          where: { projectId: report.projectId, name: benchmarkName },
+        });
+        benchmarkId = benchmark?.id ?? null;
+      }
+
+      // Create flamegraph record
+      const flamegraph = await ctx.prisma.flamegraph.create({
+        data: {
+          reportId,
+          benchmarkId,
+          storagePath,
+          fileName,
+          fileSize,
+        },
+      });
+
+      return flamegraph;
+    },
   },
 
   // Field resolvers for nested types
@@ -936,6 +1035,26 @@ const resolvers = {
           },
         },
       });
+    },
+    flamegraphs: async (parent: { id: string }, _: unknown, ctx: GraphQLContext) => {
+      return ctx.prisma.flamegraph.findMany({
+        where: { reportId: parent.id },
+        orderBy: { createdAt: "asc" },
+      });
+    },
+  },
+
+  Flamegraph: {
+    url: async (parent: { storagePath: string }) => {
+      return createSignedReadUrl(parent.storagePath);
+    },
+    benchmark: async (
+      parent: { benchmarkId: string | null },
+      _: unknown,
+      ctx: GraphQLContext
+    ) => {
+      if (!parent.benchmarkId) return null;
+      return ctx.prisma.benchmark.findUnique({ where: { id: parent.benchmarkId } });
     },
   },
 

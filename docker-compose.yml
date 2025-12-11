@@ -1,18 +1,18 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: rabbitbench-db
+    container_name: driftwatch-db
     environment:
-      POSTGRES_USER: rabbitbench
-      POSTGRES_PASSWORD: rabbitbench
-      POSTGRES_DB: rabbitbench
+      POSTGRES_USER: driftwatch
+      POSTGRES_PASSWORD: driftwatch
+      POSTGRES_DB: driftwatch
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rabbitbench"]
+      test: ["CMD-SHELL", "pg_isready -U driftwatch"]
       interval: 5s
       timeout: 5s
       retries: 5

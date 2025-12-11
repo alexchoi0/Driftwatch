@@ -14,11 +14,11 @@ use tokio::sync::oneshot;
 
 use crate::api::Config;
 
-const DEFAULT_API_URL: &str = "https://rabbitbench.dev";
+const DEFAULT_API_URL: &str = "https://driftwatch.dev";
 
 #[derive(Subcommand)]
 pub enum AuthCommands {
-    /// Authenticate with RabbitBench
+    /// Authenticate with Driftwatch
     Login {
         /// API token (skip browser auth)
         #[arg(long)]
@@ -243,8 +243,8 @@ async fn status() -> Result<()> {
         Err(_) => {
             println!("Not authenticated");
             println!();
-            println!("Run 'rabbitbench auth login' to authenticate via browser");
-            println!("Or 'rabbitbench auth login --token <token>' to use an API token");
+            println!("Run 'driftwatch auth login' to authenticate via browser");
+            println!("Or 'driftwatch auth login --token <token>' to use an API token");
         }
     }
     Ok(())
@@ -266,7 +266,7 @@ async fn logout() -> Result<()> {
 fn get_config_path() -> Result<PathBuf> {
     let config_dir = dirs::config_dir()
         .context("Could not determine config directory")?
-        .join("rabbitbench");
+        .join("driftwatch");
     Ok(config_dir.join("config.toml"))
 }
 

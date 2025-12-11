@@ -1,10 +1,10 @@
-# RabbitBench
+# Driftwatch
 
 Continuous benchmarking platform for tracking performance over time. Catch performance regressions before they hit production.
 
 ## Overview
 
-RabbitBench provides:
+Driftwatch provides:
 
 - **Performance Tracking**: Submit benchmark results and track them over time
 - **Regression Detection**: Automatic alerts when performance degrades beyond thresholds
@@ -15,7 +15,7 @@ RabbitBench provides:
 ## Architecture
 
 ```
-rabbitbench/
+driftwatch/
 ├── cli/        # Rust CLI for submitting benchmarks
 ├── server/     # Next.js app (dashboard + GraphQL API)
 └── web/        # Static landing page
@@ -36,23 +36,23 @@ cargo install --path cli
 
 ```bash
 # Browser login (recommended)
-rabbitbench auth login
+driftwatch auth login
 
 # Or with API token
-rabbitbench auth login --token rb_your_api_token
+driftwatch auth login --token dw_your_api_token
 ```
 
 ### 3. Create a Project
 
 ```bash
-rabbitbench project create --slug my-project --name "My Project"
+driftwatch project create --slug my-project --name "My Project"
 ```
 
 ### 4. Submit Benchmarks
 
 ```bash
 # Pipe benchmark output to the CLI
-cargo bench | rabbitbench run \
+cargo bench | driftwatch run \
   --project my-project \
   --branch main \
   --testbed ci-linux
@@ -101,22 +101,22 @@ jobs:
       - name: Run benchmarks
         run: cargo bench -- --save-baseline main
 
-      - name: Install RabbitBench CLI
-        run: cargo install rabbitbench
+      - name: Install Driftwatch CLI
+        run: cargo install driftwatch
 
       - name: Submit results
         run: |
-          cargo bench | rabbitbench run \
+          cargo bench | driftwatch run \
             --project ${{ github.repository }} \
             --branch ${{ github.ref_name }} \
             --testbed github-actions
         env:
-          RABBITBENCH_TOKEN: ${{ secrets.RABBITBENCH_TOKEN }}
+          DRIFTWATCH_TOKEN: ${{ secrets.DRIFTWATCH_TOKEN }}
 ```
 
 ## Hosting
 
-RabbitBench uses Supabase for database and authentication:
+Driftwatch uses Supabase for database and authentication:
 
 - **Database**: Supabase PostgreSQL
 - **Auth**: Supabase Auth with GitHub OAuth

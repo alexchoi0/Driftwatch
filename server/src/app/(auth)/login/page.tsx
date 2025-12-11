@@ -6,7 +6,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome to RabbitBench</CardTitle>
+          <CardTitle className="text-2xl">Welcome to Driftwatch</CardTitle>
           <CardDescription>
             Track and visualize your Criterion benchmark results
           </CardDescription>

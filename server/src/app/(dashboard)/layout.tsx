@@ -12,7 +12,7 @@ export default function DashboardLayout({
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-6">
             <Link href="/" className="text-xl font-bold">
-              RabbitBench
+              Driftwatch
             </Link>
             <nav className="flex gap-4 text-sm">
               <Link

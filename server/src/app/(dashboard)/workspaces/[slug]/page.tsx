@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getSession } from "@/lib/auth";
 import { getProjectBasic, getProjectBySlug, getActiveAlerts, ensureUser } from "@/lib/db/queries";
 import { BenchmarkChart } from "@/components/benchmark-chart-server";
+import { ReportsListClient } from "@/components/reports-list";
 
 // Alerts component for Suspense
 async function AlertsSection({ projectId }: { projectId: string }) {
@@ -60,7 +61,7 @@ async function AlertsSection({ projectId }: { projectId: string }) {
 async function ReportsList({ userId, slug }: { userId: string; slug: string }) {
   const project = await getProjectBySlug(userId, slug);
 
-  if (!project || project.reports.length === 0) {
+  if (!project) {
     return (
       <p className="text-sm text-muted-foreground py-4">
         No reports yet. Reports will appear here once you submit benchmark data.
@@ -68,28 +69,7 @@ async function ReportsList({ userId, slug }: { userId: string; slug: string }) {
     );
   }
 
-  return (
-    <div className="space-y-2">
-      {project.reports.map((report) => (
-        <div
-          key={report.id}
-          className="flex items-center justify-between py-2 border-b last:border-0"
-        >
-          <div>
-            <div className="font-mono text-sm">
-              {report.gitHash?.slice(0, 7) || "N/A"}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {report.branch.name} / {report.testbed.name}
-            </div>
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {new Date(report.createdAt).toLocaleDateString()}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  return <ReportsListClient reports={project.reports} />;
 }
 
 // Thresholds list data component for Suspense (minimal)

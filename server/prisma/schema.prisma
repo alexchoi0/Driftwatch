@@ -108,12 +108,13 @@ model Measure {
 }
 
 model Benchmark {
-  id        String   @id @default(uuid()) @db.Uuid
-  projectId String   @map("project_id") @db.Uuid
-  name      String   @db.VarChar(1024)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  metrics   Metric[]
+  id          String       @id @default(uuid()) @db.Uuid
+  projectId   String       @map("project_id") @db.Uuid
+  name        String       @db.VarChar(1024)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  metrics     Metric[]
+  flamegraphs Flamegraph[]
 
   @@unique([projectId, name])
   @@index([projectId])
@@ -121,17 +122,18 @@ model Benchmark {
 }
 
 model Report {
-  id        String   @id @default(uuid()) @db.Uuid
-  projectId String   @map("project_id") @db.Uuid
-  branchId  String   @map("branch_id") @db.Uuid
-  testbedId String   @map("testbed_id") @db.Uuid
-  gitHash   String?  @map("git_hash") @db.VarChar(40)
-  prNumber  Int?     @map("pr_number") // GitHub PR number for comment posting
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  branch    Branch   @relation(fields: [branchId], references: [id])
-  testbed   Testbed  @relation(fields: [testbedId], references: [id])
-  metrics   Metric[]
+  id          String       @id @default(uuid()) @db.Uuid
+  projectId   String       @map("project_id") @db.Uuid
+  branchId    String       @map("branch_id") @db.Uuid
+  testbedId   String       @map("testbed_id") @db.Uuid
+  gitHash     String?      @map("git_hash") @db.VarChar(40)
+  prNumber    Int?         @map("pr_number") // GitHub PR number for comment posting
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  branch      Branch       @relation(fields: [branchId], references: [id])
+  testbed     Testbed      @relation(fields: [testbedId], references: [id])
+  metrics     Metric[]
+  flamegraphs Flamegraph[]
 
   @@index([projectId])
   @@index([branchId])
@@ -195,4 +197,19 @@ model Alert {
   @@index([thresholdId])
   @@index([status])
   @@map("alerts")
+}
+
+model Flamegraph {
+  id          String     @id @default(uuid()) @db.Uuid
+  reportId    String     @map("report_id") @db.Uuid
+  benchmarkId String?    @map("benchmark_id") @db.Uuid
+  storagePath String     @map("storage_path") @db.VarChar(512)
+  fileName    String     @map("file_name") @db.VarChar(255)
+  fileSize    Int        @map("file_size")
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  report      Report     @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  benchmark   Benchmark? @relation(fields: [benchmarkId], references: [id])
+
+  @@index([reportId])
+  @@map("flamegraphs")
 }
