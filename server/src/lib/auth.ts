@@ -32,6 +32,9 @@ export async function getAuth() {
     }),
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL,
+    emailAndPassword: {
+      enabled: true,
+    },
     socialProviders: {
       github: {
         clientId: process.env.GITHUB_CLIENT_ID || "",
